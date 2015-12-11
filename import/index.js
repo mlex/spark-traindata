@@ -11,6 +11,8 @@ var MAX_PARALLEL_REQUESTS = 5;
 
 var S3 = new AWS.S3({region:'eu-west-1', endpoint:'s3-eu-west-1.amazonaws.com'});
 
+var S3_BUCKET = 'traindata.datalab';
+
 function extractUrls(baseUrl) {
   baseUrl = baseUrl.replace(/\/[^\/]*$/,'') + '/';
   return function(html) {
@@ -58,7 +60,7 @@ requestPromise(ZUGSONAR_INDEX).
           var size = parseFloat(response.headers['content-length'], 10);
           var sizePercent = 0;
           S3.upload({
-            Bucket: 'traindata.datalab',
+            Bucket: S3_BUCKET,
             Key: filename,
             Body: response
           }).
@@ -75,7 +77,7 @@ requestPromise(ZUGSONAR_INDEX).
             if (err) {
               console.log('ERROR: Upload of ' + filename + ' failed. ' + err);
             } else {
-              console.log('Uploaded ' + filename + ' to ' + data.Location);
+              console.log('SUCCESS: Uploaded ' + filename + ' to ' + data.Location);
             }
             finishedCallback();
           });
