@@ -3,7 +3,7 @@
 S3_TRAINDATA_BUCKET=traindata.datalab
 
 RAW_TRAINDATA_PATH=raw
-BZ_TRAINDATA_PATH=raw_bz2
+GZ_TRAINDATA_PATH=raw_gz
 
 S3_URL=s3://$S3_TRAINDATA_BUCKET
 
@@ -14,19 +14,19 @@ echo -e "FILE LIST: \n$FILES\n\n"
 for FILE in $FILES
 do
   FILE_UNZIPPED=${FILE%.7z}
-  FILE_BZIP=$FILE_UNZIPPED.bz2
+  FILE_GZIP=$FILE_UNZIPPED.gz
 
-  echo "CLEANUP (remove $FILE, $FILE_UNZIPPED, $FILE_BZIP)..."
+  echo "CLEANUP (remove $FILE, $FILE_UNZIPPED, $FILE_GZIP)..."
   rm -f ./$FILE
   rm -f ./$FILE_UNZIPPED
-  rm -f ./$FILE_BZIP
+  rm -f ./$FILE_GZIP
   echo "CLEANED UP"
 
-  echo "CHECK IF EXISTS $FILE_BZIP..."
-  COUNT=$(aws s3 ls $S3_URL/$BZ_TRAINDATA_PATH/$FILE_BZIP | wc -l)
+  echo "CHECK IF EXISTS $FILE_GZIP..."
+  COUNT=$(aws s3 ls $S3_URL/$GZ_TRAINDATA_PATH/$FILE_GZIP | wc -l)
   if [ $COUNT != 0 ]
   then
-    echo "SKIP FILE $FILE_BZIP (ALREADY EXISTS IN S3)"
+    echo "SKIP FILE $FILE_GZIP (ALREADY EXISTS IN S3)"
     continue
   fi
 
@@ -38,17 +38,17 @@ do
   7z e $FILE
   echo "UNZIPPED-FILE $FILE_UNZIPPED: $(file $FILE_UNZIPPED)"
 
-  echo "BZIP2 $FILE_UNZIPPED..."
-  bzip2 $FILE_UNZIPPED
-  echo "BZ2-FILE $FILE_BZIP: $(file $FILE_BZIP)"
+  echo "GZIP $FILE_UNZIPPED..."
+  gzip $FILE_UNZIPPED
+  echo "GZIP-FILE $FILE_GZIP: $(file $FILE_GZIP)"
 
-  echo "UPLOADING $FILE_BZIP"
-  aws s3 cp $FILE_BZIP $S3_URL/$BZ_TRAINDATA_PATH/$FILE_BZIP
-  echo "FILE $FILE_BZIP: $(aws s3 ls $S3_URL/$BZ_TRAINDATA_PATH/$FILE_BZIP)"
+  echo "UPLOADING $FILE_GZIP"
+  aws s3 cp $FILE_GZIP $S3_URL/$GZ_TRAINDATA_PATH/$FILE_GZIP
+  echo "FILE $FILE_GZIP: $(aws s3 ls $S3_URL/$GZ_TRAINDATA_PATH/$FILE_GZIP)"
 
-  echo "CLEANUP (remove $FILE, $FILE_UNZIPPED, $FILE_BZIP)..."
+  echo "CLEANUP (remove $FILE, $FILE_UNZIPPED, $FILE_GZIP)..."
   rm -f ./$FILE
   rm -f ./$FILE_UNZIPPED
-  rm -f ./$FILE_BZIP
+  rm -f ./$FILE_GZIP
   echo "CLEANED UP"
 done
